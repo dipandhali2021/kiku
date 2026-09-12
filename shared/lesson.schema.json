@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kiku.app/schemas/lesson.schema.json",
+  "title": "Kiku lesson",
+  "description": "Contract between the Kiku API and clients. Mirrored by backend/app/schemas.py and android/.../data/remote/KikuApi.kt; change all three together.",
+  "type": "object",
+  "required": ["clip_id", "title", "level", "line_count", "new_words", "comprehension_estimate", "lines"],
+  "additionalProperties": false,
+  "properties": {
+    "clip_id": {
+      "type": "string",
+      "description": "Content hash of the subtitle text. Identical subtitles always produce the same id, which is what makes lessons cacheable.",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "title": { "type": "string" },
+    "level": {
+      "type": "string",
+      "description": "Estimated JLPT level of the clip, from the level at which 80% of its vocabulary is covered.",
+      "enum": ["N5", "N4", "N3", "N2", "N1"]
+    },
+    "line_count": { "type": "integer", "minimum": 1 },
+    "new_words": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Teachable words the learner has not saved yet."
+    },
+    "comprehension_estimate": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Percentage of tokens the learner already knows. Used to warn when a clip is too hard."
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/line" }
+    }
+  },
+  "$defs": {
+    "line": {
+      "type": "object",
+      "required": ["index", "start_ms", "end_ms", "japanese", "romaji", "english", "words"],
+      "additionalProperties": false,
+      "properties": {
+        "index": { "type": "integer", "minimum": 0 },
+        "start_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Timestamp in the original clip, so the player can seek to this line."
+        },
+        "end_ms": { "type": "integer", "minimum": 0 },
+        "speaker": { "type": ["string", "null"] },
+        "japanese": { "type": "string" },
+        "romaji": {
+          "type": "string",
+          "description": "Modified Hepburn: doubled consonants for sokuon, lengthened vowels for chouonpu, apostrophe after syllabic n."
+        },
+        "english": { "type": "string" },
+        "note": {
+          "type": ["string", "null"],
+          "description": "Sentence-level grammar or register note, when there is something worth saying."
+        },
+        "words": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/word_chip" }
+        }
+      }
+    },
+    "word_chip": {
+      "type": "object",
+      "description": "One tappable token. Concatenating surfaces in order reproduces the line exactly.",
+      "required": ["surface", "lemma", "romaji", "meaning", "pos"],
+      "additionalProperties": false,
+      "properties": {
+        "surface": { "type": "string", "description": "The form as it appears on screen." },
+        "reading": { "type": ["string", "null"], "description": "Kana reading." },
+        "lemma": {
+          "type": "string",
+          "description": "Dictionary form. Review scheduling is keyed on this, so all inflections of a verb share one card."
+        },
+        "romaji": { "type": "string" },
+        "meaning": { "type": "string" },
+        "pos": {
+          "type": "string",
+          "enum": ["noun", "verb", "adjective", "adverb", "particle", "auxiliary", "pronoun", "conjunction", "interjection", "prefix", "suffix", "expression", "punctuation", "other"]
+        },
+        "note": {
+          "type": ["string", "null"],
+          "description": "Why this form: conjugation path, nuance, or politeness level."
+        },
+        "jlpt": { "type": ["string", "null"], "enum": ["N5", "N4", "N3", "N2", "N1", null] },
+        "known": { "type": "boolean", "default": false },
+        "teachable": {
+          "type": "boolean",
+          "default": true,
+          "description": "False for punctuation and symbols, which must not be tappable or saveable."
+        }
+      }
+    }
+  }
+}
