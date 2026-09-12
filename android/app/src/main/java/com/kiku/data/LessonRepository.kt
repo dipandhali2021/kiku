@@ -72,6 +72,8 @@ class LessonRepository @Inject constructor(
         api.saveWord(word)
     }
 
+    suspend fun listWords(): List<WordDto> = withContext(Dispatchers.IO) { api.listWords() }
+
     suspend fun dueWords(limit: Int = 20): List<WordDto> = withContext(Dispatchers.IO) {
         api.dueWords(limit)
     }
