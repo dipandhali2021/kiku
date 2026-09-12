@@ -1,0 +1,66 @@
+# Render Blueprint for the Kiku API.
+#
+# Commit this file, then in Render: New > Blueprint > pick this repo.
+# Everything below fits inside Render's Free plan (0.1 CPU / 512 MB RAM).
+#
+# Deliberate choice: no Render Postgres here. Free Render databases expire
+# 30 days after creation, so the MVP points at a Neon free database instead
+# (no expiry) via the DATABASE_URL secret. If you would rather use Render's
+# own database, uncomment the databases block at the bottom.
+
+services:
+  - type: web
+    name: kiku-api
+    runtime: docker
+    plan: free
+    region: singapore # closest free region to India; also: oregon, frankfurt
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    branch: main
+    autoDeploy: true
+
+    # Render polls this while starting. /health reports which tokenizer and
+    # dictionary actually loaded, so a degraded deploy is visible immediately.
+    healthCheckPath: /health
+
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+
+      # Never enable dev auth on a public URL: it would let anyone pass
+      # "Bearer dev:<anything>" and read another user's words.
+      - key: AUTH_DEV_MODE
+        value: "false"
+
+      # sync: false means "prompt me for this value once, keep it secret".
+      - key: DATABASE_URL
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+
+      # 512 MB is the hard ceiling on the free plan, and unidic-lite plus a
+      # lesson build is the memory-hungry part. Keeping clips short is what
+      # stops the container being OOM-killed mid-import.
+      - key: MAX_LINES_PER_LESSON
+        value: "60"
+      - key: MAX_SUBTITLE_BYTES
+        value: "262144"
+      - key: DAILY_LESSON_LIMIT
+        value: "20"
+
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+# databases:
+#   - name: kiku-db
+#     plan: free
+#     databaseName: kiku
+#     user: kiku
+#     # Reminder: free Render databases are deleted 30 days after creation
+#     # (plus a 14-day grace period to upgrade).
