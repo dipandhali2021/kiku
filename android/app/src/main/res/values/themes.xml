@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Compose owns all real theming (see ui/theme/Theme.kt). This XML theme
+      exists only so the window background and splash match before Compose
+      takes over, which prevents a white flash on dark devices.
+    -->
+    <style name="Theme.Kiku" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

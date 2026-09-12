@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kiku</string>
+    <string name="import_clip">Import clip</string>
+    <string name="start_review">Start review</string>
+    <string name="show_meaning">Show meaning</string>
+    <string name="save_for_review">Save for review</string>
+    <string name="privacy_note">Only the subtitles are sent. Your video stays on this phone.</string>
+</resources>
